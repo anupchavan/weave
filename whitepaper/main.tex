@@ -1,0 +1,227 @@
+% Weave: a refactoring language for Markdown vaults. A whitepaper.
+% Build with XeLaTeX (fonts are loaded through fontspec):
+%   latexmk -xelatex main.tex
+%
+% Title and contents pages follow Tufte's Beautiful Evidence, after
+% Kevin Godby's code: https://groups.google.com/forum/#!topic/tufte-latex/ujdzrktC1BQ
+
+\documentclass[nohyper,nobib]{tufte-book}
+
+%% Bibliography (citations become sidenotes)
+\usepackage{url}
+\usepackage[backend=bibtex,natbib=true,style=numeric]{biblatex}
+\addbibresource{references.bib}
+\usepackage{xargs}
+\renewcommandx{\cite}[3][1={0pt},2={}]{\sidenote[][#1]{\fullcite[#2]{#3}}}
+
+\usepackage{booktabs}
+\usepackage{graphicx}
+\graphicspath{{../assets/}}
+\usepackage{fancyvrb}
+\fvset{fontsize=\normalsize}
+\usepackage{xspace}
+
+%% Fonts. Body is TeX Gyre Pagella (the Palatino clone tufte-book uses under
+%% pdfLaTeX); the title page is Gill Sans, as in Beautiful Evidence.
+\setmainfont{texgyrepagella}[
+  Extension      = .otf,
+  UprightFont    = *-regular,
+  BoldFont       = *-bold,
+  ItalicFont     = *-italic,
+  BoldItalicFont = *-bolditalic,
+  Numbers        = OldStyle,
+]
+\setsansfont{Gill Sans}
+\newfontfamily\titleface{Gill Sans}[LetterSpace=14]
+\newfontfamily\captionface{Gill Sans}[LetterSpace=14]
+
+%% Number chapters, sections and subsections, and list them all in the contents.
+\setcounter{secnumdepth}{2}
+\setcounter{tocdepth}{2}
+
+%% Document metadata
+\title{Weave}
+\newcommand{\thesubtitle}{A Whitepaper}
+\newcommand{\theauthors}{%
+  Peteti Divya Poorna Chand\\
+  Sai Prasanna\\
+  Sai Lolitha\\
+  Anup Chavan\\
+  Mihir Divyansh\\
+  B.~Praneeth\\
+  G.~Medha Spandana}
+\author{Peteti Divya Poorna Chand, Sai Prasanna, Sai Lolitha, Anup Chavan, Mihir Divyansh, B.~Praneeth, G.~Medha Spandana}
+\publisher{Indian Institute of Technology Hyderabad}
+
+\newcommand{\monthyear}{%
+  \ifcase\month\or January\or February\or March\or April\or May\or June\or
+  July\or August\or September\or October\or November\or December\fi
+  \space\number\year}
+
+%% Title page.
+%% Spacing scale (one scale, no eyeballing): xs 12pt, s 20pt, m 32pt, l 52pt.
+%% Closer means more strongly related: title-subtitle (xs) < subtitle-authors (m).
+%% The gap is measured from the baseline of the larger element to the cap height
+%% of the smaller one, so each \vspace is reduced by the smaller element's
+%% internal leading (the space between its cap height and its box top).
+\makeatletter
+\renewcommand{\maketitlepage}{%
+\begingroup
+\thispagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+% Same title position as Beautiful Evidence: author line (24pt) + 1.75in gap.
+\vspace*{\dimexpr 1.75in + 24pt\relax}
+{\titleface\fontsize{36}{36}\selectfont\MakeUppercase{\@title}\par}
+\vspace{\dimexpr 12pt - 4pt\relax}
+{\captionface\fontsize{14}{14}\selectfont\MakeUppercase{\thesubtitle}\par}
+\vspace{\dimexpr 32pt - 3pt\relax}
+{\captionface\fontsize{10}{15}\selectfont\MakeUppercase{\theauthors}\par}
+\vfill
+\includegraphics[height=0.5in]{iith}\par
+\endgroup
+}
+\makeatother
+
+%% Contents page, in the style of Beautiful Evidence: italic chapter titles,
+%% page numbers set a quad after the title, no leaders.
+\contentsmargin{0pt}
+\titlecontents{chapter}%
+    [2em]{\addvspace{0.75\baselineskip}\filright}%
+    {\contentslabel{2em}\textit}{\textit}%
+    {\qquad\thecontentspage}[]
+\titlecontents{section}%
+    [4.25em]{\filright}%
+    {\contentslabel{2.25em}}{}%
+    {\qquad\thecontentspage}[]
+\titlecontents{subsection}%
+    [7em]{\filright}%
+    {\contentslabel{2.75em}}{}%
+    {\qquad\thecontentspage}[]
+
+\begin{document}
+
+\frontmatter
+
+\maketitle
+
+% Copyright page
+\newpage
+\begin{fullwidth}
+~\vfill
+\thispagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{\baselineskip}
+Copyright \copyright\ \the\year\ \thanklessauthor
+
+\par\textsc{cs3423 compilers, indian institute of technology hyderabad}
+
+\par\textit{First draft, \monthyear}
+\end{fullwidth}
+
+\tableofcontents
+
+\mainmatter
+
+\chapter{Introduction to Weave}
+\section{Beginnings of the Weave Project}
+\section{Design Goals of Weave}
+\subsection{Small, Declarative, and Familiar}
+\subsection{Checked Before Any Write}
+\subsection{Structure-Aware and Link-Preserving}
+\subsection{Effects in the Types}
+\subsection{Deterministic and Reproducible}
+\section{The Weave Base System}
+\section{Weave and Agents---A New Approach to Editing Vaults}
+
+\chapter{Weave---Simple and Familiar}
+\section{Main Features of the Weave Language}
+\subsection{The Vault Model: Notes, Properties, Sections, Links}
+\subsection{Selections and Filters}
+\subsection{Views: Tables and Lists}
+\subsection{Documents: Composition from Sources}
+\subsection{Migrations: Passes and Rules}
+\subsection{Policies: \texttt{on\_missing} and \texttt{on\_conflict}}
+\subsection{Null Handling and Diagnostics}
+\section{Features Left Out on Purpose}
+\subsection{No General Loops or Recursion}
+\subsection{No String Replacement over Raw Text}
+\subsection{No Writes Inside Views}
+\subsection{No Implicit Coercions}
+\subsection{No Partial Application of a Plan}
+\section{Summary}
+
+\chapter{Weave is Structure-Aware}
+\section{Why Text Is Not Enough: grep, sed, and the Prose Problem}
+\section{What Is a Vault Snapshot?}
+\section{Basics of Structure}
+\subsection{Notes and Frontmatter}
+\subsection{Sections and Headings}
+\subsection{Blockquotes and Body Nodes}
+\subsection{Links and Their Resolution}
+\subsection{Origins and Source Spans}
+\subsection{Rewriting by Span, Not by Tree}
+\section{Summary}
+
+\chapter{Checked, Atomic, and Robust}
+\section{Whole-Plan Checking}
+\subsection{Overlapping Edits}
+\subsection{Destination Collisions}
+\subsection{Ambiguous References}
+\section{All or Nothing: Staging and Application}
+\section{Robust: Snapshot Hashes and the Recovery Journal}
+\subsection{Compile-Time and Vault-Time Errors}
+\section{Summary}
+
+\chapter{Rename Is Not Find-and-Replace}
+\section{The Link Invariant}
+\subsection{The Broken-Link Problem}
+\subsection{Resolving Before Rewriting}
+\subsection{Supported Reference Forms}
+\subsection{The Compatibility Boundary}
+\section{Summary}
+
+\chapter{The Weave Compiler}
+\section{Two Frontends: the DSL and Markdown}
+\section{The Type and Effect Checker}
+\section{The Intermediate Representation}
+\section{Passes and Their Legality Conditions}
+\section{Optimisation: Shared Scans and Early Filtering}
+\section{The Reference Interpreter as Oracle}
+\section{Summary}
+
+\chapter{Queries and Composition}
+\section{Views over Metadata}
+\section{Reaching into the Body}
+\section{Assembling Documents with Provenance}
+\section{Relationship to Dataview and Bases}
+\section{Summary}
+
+\chapter{Performance and Comparisons}
+\section{Performance}
+\section{Weave Compared: grep, Python, Linter, Dataview, Bases}
+\section{A Major Benefit of Weave: Fearless Refactoring}
+\section{Summary}
+
+\chapter{Weave for Agents}
+\section{The Evolution of Vault Editing}
+\subsection{First-Generation Tools: Scripts and Regexes}
+\subsection{Agents---A New Kind of User}
+\subsection{The Essential Difference}
+\subsection{A Plan Is Small and Reviewable}
+\subsection{A Plan Cannot Be Half-Applied}
+\subsection{Syntax Costs an Agent Nothing}
+\section{Freedom to Restructure}
+\section{Implementation Details}
+\section{Safety}
+\subsection{The First Layer---the Checker}
+\subsection{The Next Layer---Preview and Apply}
+\section{Weave for Agents---the Promise}
+
+\chapter{Further Reading}
+
+\backmatter
+
+\printbibliography
+
+\end{document}
